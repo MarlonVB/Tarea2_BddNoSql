@@ -1,0 +1,243 @@
+use('Tarea2_marlon');
+db.createCollection('articulos');
+
+use('Tarea2_marlon');
+db.articulos.insertMany([
+  {
+    _id: 1,
+    nombre: 'MULTIFUNCION HP DESKJET 2675',
+    rubro: 'impresora',
+    precio: 3000,
+    stock: 20
+ },
+ {
+    _id: 2,
+    nombre: 'MULTIFUNCION EPSON EXPRESSION XP241',
+    rubro: 'impresora',
+    precio: 3700,
+    stock: 5
+ },
+ {
+    _id: 3,
+    nombre: 'LED 19 PHILIPS',
+    rubro: 'monitor',
+    precio: 4500,
+    stock: 2
+ },
+ {
+    _id: 4,
+    nombre: 'LED 22 PHILIPS',
+    rubro: 'monitor',
+    precio: 5700,
+    stock: 4
+ },
+ {
+    _id: 5,
+    nombre: 'LED 27 PHILIPS',
+    rubro: 'monitor',
+    precio: 12000,
+    stock: 1
+ },
+ {
+    _id: 6,
+    nombre: 'LOGITECH M90',
+    rubro: 'mouse',
+    precio: 300,
+    stock: 4
+ }
+
+]);
+
+/**Imprimir todos los documentos de la colección 'articulos', ordenados por nombre**/
+use('Tarea2_marlon');
+db.articulos.find({stock:0}).limit(100).sort({nombre: 1});
+
+/**Imprimir el total de documentos de la colección 'articulos'**/
+use('Tarea2_marlon');
+db.articulos.find().count();
+
+/**Imprimir los dos primeros documentos de la colección 'articulos', mostrar solo los campos _id
+y nombre.**/
+use('Tarea2_marlon');
+db.articulos.find(
+    {},
+    {
+        rubro: 0,
+        precio: 0,
+        stock: 0
+    }
+).limit(2);
+
+/**Imprimir todos los documentos de la colección 'articulos' que son impresoras, mostrar solo los
+campos nombre y precio.**/
+
+use('Tarea2_marlon');
+db.articulos.find(
+    {
+        //rubro: 'impresora'
+        rubro: {
+            $regex: 'Impresora', 
+            $options: "i"
+        }
+    },
+    {
+        _id: 0,
+        rubro: 0,
+        stock: 0
+    }
+);
+
+
+/**Imprimir todas las impresoras que tienen un precio mayor o igual a 3500. Solo mostrar los
+campos _id, nombre, precio y stock en formato de vector**/
+
+use('Tarea2_marlon');
+db.articulos.find(
+    {
+        precio:{
+            $gte: 3500
+        }
+    },
+    {
+        rubro: 0
+    }
+);
+
+/**Imprimir todos los documentos de la colección 'articulos' que son monitor, mostrar solo los
+campos nombre y precio ordenados de menor a mayor.**/
+
+use('Tarea2_marlon');
+db.articulos.find(
+    {
+        rubro: 'monitor'
+    },
+    {
+        _id: 0,
+        rubro: 0,
+        stock: 0
+    }
+).sort({nombre: 1});
+
+/**Modificar el precio del mouse 'LOGITECH M90' a 500.**/
+
+/**Manera incorrecta**/
+// * db.articulos.update({nombre:"LOGITECH M90"},{precio:500}) ESTA MAL
+// * Lo que pasara si aplicamos la anterior consulta es que si nos actualizara
+// * pero nos dejara solo el campo especificado, es decir precio.
+
+/**Manera correcta**/
+// * Tenemos dos manera de hacer un update en mongo db:
+/*Primera Manera*/
+// * Aqui haremos algo parececido a la anterior consulta erronea, pero esta vez 
+// * especificaremos todos los campos del documento, incluyendo los que querramos
+// * modificar, asi:
+use('Tarea2_marlon');
+db.articulos.updateOne(
+    {nombre:'LOGITECH M90'}, //_id o cualquier atributo que identifique al documento a editar
+
+    //Especificar todos los campos e incluir las modificaciones o
+    //podemos simplemente dejar el campo a modificar
+    {
+        $set:{
+            //nombre: 'LOGITECH M90',
+            //rubro: 'mouse',
+            precio: 500, //campo editado de 300 a 500
+            //stock: 4
+        }
+    }, 
+);
+
+/*Segunda manera*/
+// * A parte del comando updateOne tenemos el updateMany que nos permite, a diferencia de updateOne, modificar 
+// * mas de un documento.
+
+/**Fijar el stock en 0 del artículo cuyo _id es 6.**/
+use('Tarea2_marlon');
+db.articulos.updateOne(
+    {_id: 6}, //_id o cualquier atributo que identifique al documento a editar
+
+    //Especificar todos los campos e incluir las modificaciones
+    {
+        $set:{
+            stock: 0, //campo editado de 300 a 500
+        }
+    }, 
+);
+
+
+/**Agregar el campo proveedores con el array ['Martinez','Gutierrez'] para el artículo cuyo _id es
+6**/
+use('Tarea2_marlon');
+db.articulos.updateOne(
+    {_id: 6}, //_id o cualquier atributo que identifique al documento a editar
+
+    //Especificar todos los campos e incluir las modificaciones
+    {
+        $set:{
+            proveedores:[
+                'Martinez',
+                'Gutierrez'
+            ] //campo editado de 300 a 500
+        }
+    }, 
+);
+
+
+/**Eliminar el campo proveedores para el artículo cuyo _id es 6.**/
+use('Tarea2_marlon');
+db.articulos.updateOne(
+    {_id: 6}, //_id o cualquier atributo que identifique al documento a editar
+
+    //Especificar todos los campos e incluir las modificaciones
+    {
+        $unset:{
+            proveedores:[]
+        }
+    }, 
+);
+
+
+/**Imprimir todos los documentos de la colección 'articulos'.**/
+use('Tarea2_marlon');
+db.articulos.find({}).limit(100);
+
+/**Fijar el stock en cero para todos los artículos del rubro monitor.**/
+use('Tarea2_marlon');
+db.articulos.updateMany(
+    {rubro: 'monitor'}, //_id o cualquier atributo que identifique al documento a editar
+
+    //Especificar todos los campos e incluir las modificaciones
+    {
+        $set:{
+            stock: 0 //campo editado de 300 a 500
+        }
+    }, 
+);
+
+
+/**Agregar un campo llamado 'pedir' con el valor true para todos los artículos que tienen el
+campo stock en 0.**/
+use('Tarea2_marlon');
+db.articulos.updateMany(
+    {stock: 0}, //_id o cualquier atributo que identifique al documento a editar
+
+    //Especificar todos los campos e incluir las modificaciones
+    {
+        $set:{
+            pedir: true //campo editado de 300 a 500
+        }
+    }, 
+);
+
+/**Eliminar el campo 'pedir' de todos los documentos**/
+use('Tarea2_marlon');
+db.articulos.updateMany(
+    {}, //_id o cualquier atributo que identifique al documento a editar
+
+    //Especificar todos los campos e incluir las modificaciones
+    {
+        $unset:{
+            pedir: true //campo editado de 300 a 500
+        }
+    }, 
+);
